@@ -148,5 +148,48 @@ namespace COMP123_S2019_Lesson11B
                 Debug.WriteLine("Student ID:" + student.StudentID + "Last Name:" + student.LastName);
             }
         }
+
+        private void oPENToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            //configure the file dialog
+            StudentOpenFileDialog.FileName = "Student.txt";
+            StudentOpenFileDialog.InitialDirectory = Directory.GetCurrentDirectory();
+            StudentOpenFileDialog.Filter = "Text Files (*.txt)|(*.txt| All Files (*.*)|*.*";
+
+            //open the file dialog
+            var result = StudentSaveFileDialog.ShowDialog();
+            if(result!= DialogResult.Cancel)
+            {
+                try
+                {
+                    //open the stream for reading
+                    using (StreamReader inputStream = new StreamReader(
+                    File.Open(StudentOpenFileDialog.FileName, FileMode.Open)))
+                    {
+
+                        //read stuff from the file into the student class
+                        Program.student.Id = int.Parse(inputStream.ReadLine());
+                        Program.student.StudentId = inputStream.ReadLine();
+                        Program.student.FirstName = inputStream.ReadLine();
+                        Program.student.LastName = inputStream.ReadLine();
+
+                        //cleanup
+                        inputStream.Close();
+                        inputStream.Dispose();
+
+                    }
+
+                    NextButton_Click(sender, e);
+                }
+
+                catch (IOException exception)
+                {
+                    Debug.WriteLine("ERROR" + exception.Message);
+                    MessageBox.Show("Error:" + exception.Message, "File I/O Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }
+            }
+
+            
+        }
     }
 }
