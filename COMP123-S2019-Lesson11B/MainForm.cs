@@ -154,7 +154,7 @@ namespace COMP123_S2019_Lesson11B
             //configure the file dialog
             StudentOpenFileDialog.FileName = "Student.txt";
             StudentOpenFileDialog.InitialDirectory = Directory.GetCurrentDirectory();
-            StudentOpenFileDialog.Filter = "Text Files (*.txt)|(*.txt| All Files (*.*)|*.*";
+            StudentOpenFileDialog.Filter = "Binary Files (*.txt)|(*.txt| All Files (*.*)|*.*";
 
             //open the file dialog
             var result = StudentSaveFileDialog.ShowDialog();
@@ -185,11 +185,98 @@ namespace COMP123_S2019_Lesson11B
                 catch (IOException exception)
                 {
                     Debug.WriteLine("ERROR" + exception.Message);
-                    MessageBox.Show("Error:" + exception.Message, "File I/O Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    MessageBox.Show("Error: " + exception.Message, "File I/O Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }
+
+                catch (FormatException exception)
+                {
+                    Debug.WriteLine("ERROR" + exception.Message);
+                    MessageBox.Show("Error: " + exception.Message + "\n\nPlease select the appropriate file type","ERROR", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 }
             }
 
             
+        }
+
+        private void openBinaryFileToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            //configure the file dialog
+            StudentOpenFileDialog.FileName = "Student.dat";
+            StudentOpenFileDialog.InitialDirectory = Directory.GetCurrentDirectory();
+            StudentOpenFileDialog.Filter = "Text Files (*.dat)|(*.dat| All Files (*.*)|*.*";
+
+            //open the file dialog
+            var result = StudentSaveFileDialog.ShowDialog();
+            if (result != DialogResult.Cancel)
+            {
+                try
+                {
+                    //open the stream for reading
+                    using (BinaryReader inputStream = new BinaryReader(
+                    File.Open(StudentOpenFileDialog.FileName, FileMode.Open)))
+                    {
+
+                        //read stuff from the file into the student class
+                        Program.student.Id = int.Parse(inputStream.ReadString());
+                        Program.student.StudentId = inputStream.ReadString();
+                        Program.student.FirstName = inputStream.ReadString();
+                        Program.student.LastName = inputStream.ReadString();
+
+                        //cleanup
+                        inputStream.Close();
+                        inputStream.Dispose();
+
+                    }
+
+                    NextButton_Click(sender, e);
+                }
+
+                catch (IOException exception)
+                {
+                    Debug.WriteLine("ERROR" + exception.Message);
+                    MessageBox.Show("Error:" + exception.Message, "File I/O Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }
+            }
+
+        }
+
+        private void saveBinaryFileToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            //configure the file dialog
+            StudentSaveFileDialog.FileName = "Student.dat";
+            StudentSaveFileDialog.InitialDirectory = Directory.GetCurrentDirectory();
+            StudentSaveFileDialog.Filter = "Binary Files (*.dat)|(*.dat| All Files (*.*)|*.*";
+
+            //open the file dialog
+            var result = StudentSaveFileDialog.ShowDialog();
+            if (result != DialogResult.Cancel)
+            {
+                //open file to write
+                using (BinaryWriter outputStream = new BinaryWriter(
+                    File.Open(StudentSaveFileDialog.FileName, FileMode.Create)))
+                {
+                    //write stuff to the file
+                    outputStream.Write(Program.student.Id);
+                    outputStream.Write(Program.student.StudentId);
+                    outputStream.Write(Program.student.FirstName);
+                    outputStream.Write(Program.student.LastName);
+
+                    outputStream.Flush();
+
+                    //close the file
+                    outputStream.Close();
+
+                    //dispose of the memory
+                    outputStream.Dispose();
+
+                }
+
+                //give feedback to the user that the file has been saved
+                //this is a "modal" form
+                MessageBox.Show("Binary File Saved", "Saving Binary File...", MessageBoxButtons.OK, MessageBoxIcon.Information);
+
+            }
+
         }
     }
 }
